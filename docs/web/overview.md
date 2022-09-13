@@ -358,7 +358,7 @@ spline: explain
   </div>
 </section>
 
-<h3>消息提醒<em class="tag">7</em></h3>
+<h3>消息提醒<em class="tag">8</em></h3>
 <section class="image-group">
   <div class="image-wrapper">
     <a class="item" href="./components/alert">
@@ -384,8 +384,8 @@ spline: explain
 
   <div class="image-wrapper">
     <a class="item" href="./components/guide">
-      <img class="__light__" src="https://tdesign.gtimg.com/site/doc/doc-button.png" />
-      <img class="__dark__" src="https://tdesign.gtimg.com/site/doc/doc-button-dark.png" />
+      <img class="__light__" src="https://tdesign.gtimg.com/site/doc/doc-guide.png" />
+      <img class="__dark__" src="https://tdesign.gtimg.com/site/doc/doc-guide-dark.png" />
       <p class="name">Guide</p>
     </a>
   </div>
