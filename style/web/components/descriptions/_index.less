@@ -22,6 +22,10 @@
     border-collapse: collapse;
     font: @font-body-medium;
 
+    td {
+      vertical-align: top;
+    }
+
     &.@{prefix}-size-l {
       td {
         padding: @descriptions-padding-l;
@@ -40,7 +44,11 @@
       }
     }
 
-    & .@{prefix}-@{componentName}__label {
+    &:not(&--border) td:first-child {
+      padding-left: 0;
+    }
+
+    .@{prefix}-@{componentName} {
       color: @text-color-placeholder;
     }
 
