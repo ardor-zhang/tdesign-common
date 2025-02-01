@@ -1,6 +1,5 @@
 ﻿{
   "compilerOptions": {
-    "jsx": "react",
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "module": "esnext",
