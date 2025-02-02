@@ -1,6 +1,6 @@
 import { isString, isNull, isUndefined, isNumber, isArray } from 'lodash-es';
 
-export function omit(obj: object, fields: string[]): object {
+export function omit(obj: Record<string, any>, fields: string[]) {
   const shallowCopy = {
     ...obj,
   };
@@ -11,12 +11,12 @@ export function omit(obj: object, fields: string[]): object {
   return shallowCopy;
 }
 
-export function removeEmptyAttrs<T>(obj: T): Partial<T> {
-  const newObj = {};
+export function removeEmptyAttrs<T extends Record<string, any>>(obj: T): Partial<T> {
+  const newObj: Partial<T> = {};
 
   Object.keys(obj).forEach((key) => {
     if (!isUndefined(obj[key]) || isNull(obj[key])) {
-      newObj[key] = obj[key];
+      newObj[key as keyof T] = obj[key];
     }
   });
 
@@ -57,7 +57,7 @@ export function getBackgroundColor(color: string | string[] | LinearGradient): s
       const c = parseFloat(a.substr(0, a.length - 1)) - parseFloat(b.substr(0, b.length - 1));
       return c;
     });
-    const tempArr = keys.map((key: any) => `${rest[key]} ${key}`);
+    const tempArr = keys.map((key: any) => `${rest[key as keyof typeof rest]} ${key}`);
     return `linear-gradient(${direction}, ${tempArr.join(',')})`;
   }
   return `linear-gradient(${direction}, ${from}, ${to})`;

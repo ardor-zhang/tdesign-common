@@ -108,7 +108,7 @@ export function isSame(date1: Date, date2: Date, type = 'date', dayjsLocale = 'z
     isSameMonth,
     isSameWeek,
     isSameDate,
-  };
+  } as Record<string, (date1: Date, date2: Date, dayjsLocale?: string) => boolean>;
   return func[`isSame${firstUpperCase(type)}`](date1, date2, dayjsLocale);
 }
 
