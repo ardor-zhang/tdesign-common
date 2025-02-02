@@ -16,5 +16,5 @@ export function getFormatValue(value:number | undefined | string, decimalPlaces:
     useGrouping: !!separator,
   };
   // replace的替换的方案仅能应对大部分地区
-  return value.toLocaleString(undefined, options).replace(/,|，/g, separator);
+  return value?.toLocaleString(undefined, options).replace(/,|，/g, separator) ?? '';
 }

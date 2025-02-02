@@ -8,9 +8,13 @@ import { Styles } from '../common';
 function setStyle(el: HTMLElement, styles: Styles): void {
   const keys = Object.keys(styles);
   keys.forEach((key) => {
-    // eslint-disable-next-line no-param-reassign
+    // @ts-ignore
     el.style[key] = styles[key];
   });
+  // todo 建议改成如下
+  // Object.entries(styles).forEach(([key, value]) => {
+  //   el.style.setProperty(key, String(value));
+  // });
 }
 
 export default setStyle;

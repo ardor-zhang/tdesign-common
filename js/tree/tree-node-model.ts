@@ -155,9 +155,9 @@ export class TreeNodeModel {
    * 获取本节点的父节点
    * @return TreeNodeModel 父节点
    */
-  public getParent(): TypeTreeNodeModel {
+  public getParent(): TypeTreeNodeModel | null {
     const node = this[nodeKey];
-    return node.parent?.getModel();
+    return node.parent?.getModel() || null;
   }
 
   /**
@@ -266,10 +266,12 @@ export class TreeNodeModel {
     const cleanData = omit(data, ['children', ...syncAttrs]);
     const { keys } = node.tree.config;
     syncAttrs.forEach((attr: string) => {
-      const dataAttrValue = get(data, keys?.[attr] || attr);
-      if (!isUndefined(dataAttrValue)) cleanData[attr] = dataAttrValue;
+      const dataAttrValue = get(data, keys?.[attr as keyof typeof keys] || attr);
+      if (!isUndefined(dataAttrValue)) cleanData[attr as keyof typeof keys] = dataAttrValue;
     });
-    Object.assign(node.data, cleanData);
+    if (node.data) {
+      Object.assign(node.data, cleanData);
+    }
     Object.assign(node, cleanData);
     node.update();
   }

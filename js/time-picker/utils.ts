@@ -34,7 +34,7 @@ export function getPickerCols(format:string) {
     meridiem, hour, minute, second, milliSecond,
   } = EPickerCols;
   const match = format.match(TIME_FORMAT);
-  match.forEach((m) => {
+  match?.forEach((m) => {
     switch (m) {
       case 'H':
       case 'HH':

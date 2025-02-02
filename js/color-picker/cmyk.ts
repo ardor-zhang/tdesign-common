@@ -78,6 +78,7 @@ export const cmykInputToColor = (input: string) => {
   if (/cmyk/i.test(input)) {
     const str = input.replace(/\s/g, '');
     const match = str.match(REG_CMYK_STRING);
+    if (!match) return input;
     const c = toNumber(match[1]);
     const m = toNumber(match[2]);
     const y = toNumber(match[3]);

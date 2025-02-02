@@ -100,7 +100,7 @@ const generateRegExp = (): RegExpLib => {
  * @returns {object|undefined}
  */
 const parseGradient = (regExpLib: RegExpLib, input: string) => {
-  let result: ParseGradientResult;
+  let result: ParseGradientResult | undefined = undefined;
   let matchColorStop: any;
   let stopResult: ColorStop;
 
@@ -145,7 +145,7 @@ const parseGradient = (regExpLib: RegExpLib, input: string) => {
         // eslint-disable-next-line prefer-destructuring
         stopResult.position = matchColorStop[2];
       }
-      result.colorStopList.push(stopResult);
+      result.colorStopList?.push(stopResult);
 
       // Continue searching from previous position.
       matchColorStop = regExpLib.colorStopSearch.exec(matchGradient[4]);
@@ -181,7 +181,7 @@ export const isGradientColor = (input: string): null | RegExpExecArray => {
 };
 
 // 边界字符串和角度关系
-const sideCornerDegreeMap = {
+const sideCornerDegreeMap: Record<string, number> = {
   top: 0,
   right: 90,
   bottom: 180,
@@ -211,20 +211,21 @@ export const parseGradientString = (input: string): GradientColors | boolean => 
     degree: 0,
   };
 
-  const result: ParseGradientResult = parseGradient(REGEXP_LIB, match[1]);
+  const result: ParseGradientResult | undefined = parseGradient(REGEXP_LIB, match[1]);
+  if (!result) return false;
   if (result.original.trim() !== match[1].trim()) {
     return false;
   }
-  const points: GradientColorPoint[] = result.colorStopList.map(({ color, position }) => {
+  const points: GradientColorPoint[] = result.colorStopList?.map(({ color, position }) => {
     const point = Object.create(null);
     point.color = tinyColor(color).toRgbString();
-    point.left = parseFloat(position);
+    point.left = parseFloat(position ?? '0');
     return point;
-  });
+  }) ?? [];
   gradientColors.points = points;
-  let degree = parseInt(result.angle, 10);
+  let degree = parseInt(result.angle ?? '90', 10);
   if (Number.isNaN(degree)) {
-    degree = sideCornerDegreeMap[result.sideCorner] || 90;
+    degree = sideCornerDegreeMap[result.sideCorner ?? ''] ?? 90;
   }
   gradientColors.degree = degree;
 

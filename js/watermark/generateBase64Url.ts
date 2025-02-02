@@ -22,7 +22,7 @@ export default function generateBase64Url({
   alpha:number,
   watermarkContent: WatermarkText | WatermarkImage | Array<WatermarkText | WatermarkImage>,
   lineSpace:number
-}, onFinish: (url: string) => void): string {
+}, onFinish: (url: string) => void): string | void {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -52,6 +52,8 @@ export default function generateBase64Url({
 
   const contents = Array.isArray(watermarkContent) ? watermarkContent : [{ ...watermarkContent }];
   let top = 0;
+  // todo paopao
+  // @ts-ignore
   contents.forEach((item: WatermarkText & WatermarkImage & { top: number }) => {
     if (item.url) {
       const { url, isGrayscale = false } = item;

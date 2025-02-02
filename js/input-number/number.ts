@@ -162,7 +162,7 @@ export function getStepValue(p: {
     }
   }
   if (isUndefined(lastValue)) {
-    newVal = putInRangeNumber(newVal, { max, min, lastValue, largeNumber });
+    newVal = putInRangeNumber(newVal ?? '', { max, min, lastValue, largeNumber });
   }
   return largeNumber ? newVal : Number(newVal);
 }
@@ -211,9 +211,9 @@ export function canInputNumber(number: string, largeNumber: boolean) {
   // 不能出现空格
   if (number.match(/\s/g)) return false;
   // 只能出现一个点（.）
-  if (number.match(/\./g)?.length > 1) return false;
+  if ((number.match(/\./g)?.length ?? 0) > 1) return false;
   // 只能出现一个e（e）
-  if (number.match(/e/g)?.length > 1) return false;
+  if ((number.match(/e/g)?.length ?? 0) > 1) return false;
   // 只能出现一个负号（-）或 一个正号（+），并且在第一个位置；但允许 3e+10 这种形式
   const tmpNumber = number.slice(1);
   if (/(\+|-)/.test(tmpNumber) && !/e+/i.test(tmpNumber)) return false;
@@ -243,7 +243,7 @@ export function formatUnCompleteNumber(
     largeNumber?: boolean;
     isToFixed?: boolean;
   } = {}
-): number | string {
+): number | string | undefined {
   if (['', null, undefined].includes(number) || !/\d+/.test(number)) return undefined;
   const { decimalPlaces, largeNumber, isToFixed } = extra;
   let newNumber = number.replace(/[.|+|\-|e]$/, '');

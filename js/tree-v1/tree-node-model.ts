@@ -115,7 +115,7 @@ export function createNodeModel(node: TreeNode): TypeTreeNodeModel {
      * 获取本节点的父节点
      * @return TreeNodeModel 父节点
      */
-    getParent(): TypeTreeNodeModel {
+    getParent(): TypeTreeNodeModel | undefined {
       return node.parent?.getModel();
     },
 

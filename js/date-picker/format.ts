@@ -98,7 +98,7 @@ function formatRange({
 }) {
   if (!newDate || !Array.isArray(newDate)) return [];
 
-  let dayjsDateList = newDate.map((d) => d && parseToDayjs(d, format).locale(dayjsLocale));
+  let dayjsDateList = newDate.map((d) => d && parseToDayjs(d, format).locale(dayjsLocale ?? ''));
 
   // 保证后面的时间大于前面的时间
   if (
@@ -142,7 +142,7 @@ function formatSingle({
 }) {
   if (!newDate) return '';
 
-  const dayJsDate = parseToDayjs(newDate, format).locale(dayjsLocale);
+  const dayJsDate = parseToDayjs(newDate, format).locale(dayjsLocale ?? '');
 
   // 格式化失败提示
   if (!dayJsDate.isValid()) {

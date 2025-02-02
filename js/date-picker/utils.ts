@@ -108,7 +108,7 @@ export function isSame(date1: Date, date2: Date, type = 'date', dayjsLocale = 'z
     isSameMonth,
     isSameWeek,
     isSameDate,
-  };
+  } as Record<string, (date1: Date, date2: Date, dayjsLocale?: string) => boolean>;
   return func[`isSame${firstUpperCase(type)}`](date1, date2, dayjsLocale);
 }
 
@@ -166,7 +166,7 @@ export function setDateTime(
     .hour(hours)
     .minute(minutes)
     .second(seconds)
-    .millisecond(milliseconds)
+    .millisecond(milliseconds ?? 0)
     .toDate();
 }
 
@@ -310,7 +310,7 @@ export function getQuarters(
       now: isSame(date, today, 'quarter'),
       disabled: (isFunction(disableDate) && disableDate(date)) || (!cancelRangeSelectLimit && outOfRanges(date, minDate, maxDate)),
       active: false,
-      text: quarterLocal[i - 1],
+      text: quarterLocal?.[i - 1] ?? '',
       dayjsObj: dayjs(date).locale(dayjsLocale),
     });
   }
@@ -366,7 +366,7 @@ export function getMonths(year: number, params: OptionsType) {
       now: isSame(date, today, 'month'),
       disabled: (isFunction(disableDate) && disableDate(date)) || (!cancelRangeSelectLimit && outOfRanges(date, minDate, maxDate)),
       active: false,
-      text: monthLocal[date.getMonth()], // `${date.getMonth() + 1} ${monthText || '月'}`,
+      text: monthLocal?.[date.getMonth()] ?? '', // `${date.getMonth() + 1} ${monthText || '月'}`,
       dayjsObj: dayjs(date).locale(dayjsLocale),
     });
   }

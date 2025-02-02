@@ -50,7 +50,7 @@ export function isRowSelectedDisabled(
 // 获取列属性
 export function getColWidthAttr<T extends BaseTableCol<T>>(col: T, attrKey: 'width' | 'minWidth') {
   const attr = col[attrKey];
-  return isNumber(attr) ? attr : parseFloat(attr);
+  return isNumber(attr) ? attr : parseFloat(attr ?? '');
 }
 
 export function getEditableKeysMap(keys: Array<string | number>, list: any[], rowKey: string) {

@@ -15,6 +15,7 @@ import {
   UploadTriggerUploadText,
   ErrorContext,
   ResponseType,
+  OnResponseErrorContext,
 } from './types';
 
 export interface BeforeUploadExtra {
@@ -24,20 +25,20 @@ export interface BeforeUploadExtra {
   beforeUpload?: (file: UploadFile) => boolean | Promise<boolean>;
 }
 
-export type BeforeUploadPromiseList = [Promise<SizeLimitObj>, undefined | Promise<boolean>]
+export type BeforeUploadPromiseList = [Promise<SizeLimitObj | null>, undefined | Promise<boolean>]
 
 export function handleBeforeUpload(
   file: UploadFile, params: BeforeUploadExtra,
 ): Promise<[SizeLimitObj, boolean]> {
   const { sizeLimit, beforeUpload } = params;
   // 文件大小校验
-  const sizePromise = new Promise<SizeLimitObj>((resolve) => {
-    let result: SizeLimitObj = null;
+  const sizePromise = new Promise<SizeLimitObj | null>((resolve) => {
+    let result: SizeLimitObj | null = null;
     if (sizeLimit) {
       const sizeLimitObj: SizeLimitObj = isNumber(sizeLimit)
         ? { size: sizeLimit, unit: 'KB' }
         : sizeLimit;
-      const limit = isOverSizeLimit(file.size, sizeLimitObj.size, sizeLimitObj.unit);
+      const limit = isOverSizeLimit(file.size || 0, sizeLimitObj.size, sizeLimitObj.unit);
       if (limit) {
         result = sizeLimitObj;
       }
@@ -56,7 +57,7 @@ export function handleBeforeUpload(
   // 同时进行文件大小校验和自定义校验函数
   return new Promise((resolve) => {
     Promise.all(promiseList).then((r) => {
-      resolve(r);
+      resolve(r as [SizeLimitObj, boolean]);
     });
   });
 }
@@ -69,27 +70,27 @@ export function handleError(options: OnErrorParams) {
   const { event, files, response, XMLHttpRequest, formatResponse } = options;
   let res = response;
   if (isFunction(formatResponse)) {
-    res = formatResponse(response, { file: files[0], currentFiles: files });
+    res = formatResponse(response, { file: files?.[0] || {}, currentFiles: files || [] });
   }
-  files.forEach((file) => {
+  files?.forEach((file) => {
     file.status = 'fail';
     file.response = res;
   });
-  return { response: res, event, files, XMLHttpRequest };
+  return { response: res, event, files, XMLHttpRequest } as OnResponseErrorContext;
 }
 
 export function handleSuccess(params: handleSuccessParams) {
   const { event, files, response, XMLHttpRequest } = params;
-  if (files?.length <= 0) {
+  if ((files?.length ?? 0) <= 0) {
     log.error('Upload', 'Empty File in Success Callback');
   }
-  files.forEach((file) => {
+  files?.forEach((file) => {
     file.percent = 100;
     file.status = 'success';
     delete file.response?.error;
   });
   const res = response;
-  files[0].url = res.url || files[0].url;
+  files![0].url = res?.url || files?.[0].url;
   return { response: res, event, files, XMLHttpRequest };
 }
 
@@ -197,7 +198,7 @@ export function uploadOneRequest(params: HandleUploadParams): Promise<UploadRequ
       });
     } else {
       const xhrReq = xhr({
-        action: params.action,
+        action: params.action || '',
         files: params.toUploadFiles,
         useMockProgress: params.useMockProgress,
         mockProgressDuration: params.mockProgressDuration,
@@ -206,34 +207,34 @@ export function uploadOneRequest(params: HandleUploadParams): Promise<UploadRequ
           params.onResponseError?.(r);
           resolve({ status: 'fail', data: r });
         },
-        onProgress: params.onResponseProgress,
+        onProgress: params.onResponseProgress || (() => {}),
         onSuccess: (p: SuccessContext) => {
           const { formatResponse } = params;
           let res = p.response;
           if (isFunction(formatResponse)) {
             res = formatResponse(p.response, {
-              file: p.file,
-              currentFiles: p.files,
+              file: p.file || {},
+              currentFiles: p.files || [],
             });
           }
-          if (res.error) {
+          if (res?.error) {
             const r = handleError({ ...p, response: res });
             params.onResponseError?.(r);
             resolve({ status: 'fail', data: r });
           } else {
-            p.file.response = res;
-            p.files[0].response = res;
+            p.file!.response = res;
+            p.files![0].response = res;
             const r = handleSuccess({ ...p, response: res });
             params.onResponseSuccess?.(r);
             resolve({ status: 'success', data: r });
           }
         },
         formatRequest: params.formatRequest,
-        data: params.data,
-        name: params.name,
-        headers: params.headers,
-        withCredentials: params.withCredentials,
-        method: params.method,
+        data: params.data || {},
+        name: params.name || '',
+        headers: params.headers || {},
+        withCredentials: params.withCredentials || false,
+        method: params.method || 'POST',
       });
       params.setXhrObject?.({
         files: params.toUploadFiles,
@@ -273,11 +274,11 @@ Promise<UploadRequestReturn> {
     if (uploadAllFilesInOneRequest || !params.multiple) {
       uploadOneRequest(params).then((r) => {
         if (r.status === 'success') {
-          r.data.files = isBatchUpload || !params.multiple
-            ? r.data.files
-            : updateUploadedFiles(uploadedFiles, r.data.files);
+          r.data!.files = isBatchUpload || !params.multiple
+            ? r.data!.files
+            : updateUploadedFiles(uploadedFiles, r.data!.files || []);
         }
-        const failedFiles = r.status === 'fail' ? r.data.files : [];
+        const failedFiles = r.status === 'fail' ? r.data!.files : [];
         resolve({ ...r, failedFiles });
       });
       return;
@@ -291,9 +292,9 @@ Promise<UploadRequestReturn> {
       const failedFiles: UploadFile[] = [];
       arr.forEach((one) => {
         if (one.status === 'success') {
-          files.push(one.data.files[0]);
+          files.push(one.data!.files?.[0] || {});
         } else if (one.status === 'fail') {
-          failedFiles.push(one.data.files[0]);
+          failedFiles.push(one.data!.files?.[0] || {});
         }
       });
       const tFiles = params.autoUpload
@@ -406,7 +407,7 @@ export function validateFile(
         resolve({
           lengthOverLimit,
           hasSameNameFile,
-          fileValidateList: others,
+          fileValidateList: others as FileChangeReturn[],
           files: formattedFiles,
         });
       }
@@ -420,19 +421,19 @@ export function getFilesAndErrors(fileValidateList: FileChangeReturn[], getError
   const toFiles: UploadFile[] = [];
   fileValidateList.forEach((oneFile) => {
     if (oneFile.validateResult?.type === 'CUSTOM_BEFORE_UPLOAD') {
-      beforeUploadErrorFiles.push(oneFile.file);
+      beforeUploadErrorFiles.push(oneFile.file || {});
       return;
     }
     if (oneFile.validateResult?.type === 'FILE_OVER_SIZE_LIMIT') {
-      if (!oneFile.file.response) {
-        oneFile.file.response = {};
+      if (!oneFile.file?.response) {
+        oneFile.file!.response = {};
       }
-      oneFile.file.response.error = oneFile.file.response.error
-      || getError(oneFile.validateResult.extra);
+      oneFile.file!.response.error = oneFile.file!.response.error
+      || getError(oneFile.validateResult.extra || {});
       sizeLimitErrors.push(oneFile);
       return;
     }
-    toFiles.push(oneFile.file);
+    toFiles.push(oneFile.file || {});
   });
 
   return { sizeLimitErrors, beforeUploadErrorFiles, toFiles };

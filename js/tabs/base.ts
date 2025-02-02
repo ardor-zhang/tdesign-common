@@ -1,5 +1,5 @@
-const getDomWidth = (dom: HTMLElement): number => dom?.offsetWidth || 0;
-const getDomOffsetLeft = (dom: HTMLElement): number => dom?.offsetLeft || 0;
+const getDomWidth = (dom?: HTMLElement): number => dom?.offsetWidth || 0;
+const getDomOffsetLeft = (dom?: HTMLElement): number => dom?.offsetLeft || 0;
 
 type scrollPosition = 'auto' | 'start' | 'center' | 'end';
 

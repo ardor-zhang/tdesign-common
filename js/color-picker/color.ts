@@ -31,7 +31,7 @@ interface ColorStates {
 interface GradientStates {
   colors: GradientColorPoint[];
   degree: number;
-  selectedId: string;
+  selectedId: string | null;
   css?: string;
 }
 
@@ -48,8 +48,8 @@ const hsv2hsla = (states: ColorStates): tinyColor.ColorFormats.HSLA => tinyColor
 export const gradientColors2string = (object: GradientColors): string => {
   const { points, degree } = object;
   const colorsStop = points
-    .sort((pA, pB) => pA.left - pB.left)
-    .map((p) => `${p.color} ${Math.round(p.left * 100) / 100}%`);
+    .sort((pA, pB) => (pA?.left ?? 0) - (pB?.left ?? 0))
+    .map((p) => `${p.color} ${Math.round((p.left ?? 0) * 100) / 100}%`);
 
   return `linear-gradient(${degree}deg,${colorsStop.join(',')})`;
 };
@@ -84,9 +84,9 @@ export class Color {
     a: 1,
   };
 
-  originColor: string;
+  originColor!: string;
 
-  isGradient: boolean;
+  isGradient!: boolean;
 
   gradientStates: GradientStates = {
     colors: [],
@@ -117,14 +117,14 @@ export class Color {
     if (gradientColors) {
       this.isGradient = true;
       const object = gradientColors as GradientColors;
-      const points = object.points.map((c) => genGradientPoint(c.left, c.color));
+      const points = object.points.map((c) => genGradientPoint(c.left ?? 0, c.color ?? ''));
       this.gradientStates = {
         colors: points,
         degree: object.degree,
         selectedId: points[0]?.id || null,
       };
       this.gradientStates.css = this.linearGradient;
-      colorInput = this.gradientSelectedPoint?.color;
+      colorInput = this.gradientSelectedPoint?.color ?? '';
     }
 
     this.updateStates(colorInput);
@@ -242,7 +242,7 @@ export class Color {
   }
 
   get gradientSelectedId() {
-    return this.gradientStates.selectedId;
+    return this.gradientStates.selectedId ?? '';
   }
 
   set gradientSelectedId(id: string) {
@@ -250,7 +250,7 @@ export class Color {
       return;
     }
     this.gradientStates.selectedId = id;
-    this.updateStates(this.gradientSelectedPoint?.color);
+    this.updateStates(this.gradientSelectedPoint?.color ?? '');
   }
 
   get gradientDegree() {
@@ -473,13 +473,12 @@ const COLOR_OBJECT_OUTPUT_KEYS = [
  * @param color
  * @returns
  */
-export const getColorObject = (color: Color): ColorObject => {
+export const getColorObject = (color: Color): ColorObject | null => {
   if (!color) {
     return null;
   }
   const colorObject = Object.create(null);
-  // eslint-disable-next-line no-return-assign
-  COLOR_OBJECT_OUTPUT_KEYS.forEach((key) => (colorObject[key] = color[key]));
+  COLOR_OBJECT_OUTPUT_KEYS.forEach((key) => (colorObject[key] = (color as { [key: string]: any })[key]));
   if (color.isGradient) {
     colorObject.linearGradient = color.linearGradient;
   }

@@ -132,27 +132,27 @@ export interface TreeNodeModel<
   /**
    * 获取单个父节点
    */
-  getParent: () => TreeNodeModel;
+  getParent: () => TreeNodeModel<T> | undefined;
   /**
    * 获取所有父节点
    */
-  getParents: () => TreeNodeModel[];
+  getParents: () => TreeNodeModel<T>[];
   /**
    * 获取当前节点的直接子节点
    */
-  getChildren: (deep?: boolean) => boolean | TreeNodeModel[];
+  getChildren: (deep?: boolean) => boolean | TreeNodeModel<T>[];
   /**
    * 获取节点全路径
    */
-  getPath: () => TreeNodeModel[];
+  getPath: () => TreeNodeModel<T>[];
   /**
    * 获取根节点
    */
-  getRoot: () => TreeNodeModel;
+  getRoot: () => TreeNodeModel<T>;
   /**
    * 获取兄弟节点，包含自己在内
    */
-  getSiblings: () => TreeNodeModel[];
+  getSiblings: () => TreeNodeModel<T>[];
   /**
    * 在当前节点前插入新节点
    */

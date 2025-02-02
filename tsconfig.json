@@ -1,20 +1,40 @@
 ﻿{
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "module": "esnext",
+    /* Language and Environment */
     "target": "esnext",
-    "declaration": true,
     "lib": ["esnext", "dom"],
-    "importHelpers": true,
+    // todo: 待移除 哪里有使用装饰器吗
+    "experimentalDecorators": true,
+
+    /* Modules */
+    "module": "esnext",
+    "moduleResolution": "node",
     "baseUrl": "./",
-    "allowJs": true,
+
+    /* JavaScript Support */
+    // todo: 待移除 这个有必要吗？
     "checkJs": true,
+    "allowJs": true,
+
+    /* Emit */
+    "declaration": true,
+    "removeComments": true,
+    "importHelpers": true,
     "downlevelIteration": true,
-    "esModuleInterop": true
+
+    /* Interop Constraints */
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
+    /* Type Checking */
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Completeness */
+    "skipLibCheck": true
   },
   "include": ["js"],
   "exclude": ["node_modules"],
-  "types": ["vitest/global"],
-  "compileOnSave": false
+  "types": ["vitest/global"]
 }

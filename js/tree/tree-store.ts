@@ -95,13 +95,13 @@ export class TreeStore {
   public emitter: ReturnType<typeof mitt>;
 
   // 数据更新计时器
-  private updateTick: Promise<void>;
+  private updateTick?: Promise<void>;
 
   // 识别是否需要重排
   private shouldReflow: boolean;
 
   // 树节点过滤器
-  private prevFilter: TypeTreeFilter;
+  private prevFilter?: TypeTreeFilter;
 
   public constructor(options: TypeTreeStoreOptions) {
     const config: TypeTreeStoreOptions = {
@@ -118,17 +118,17 @@ export class TreeStore {
       disabled: false,
       disableCheck: false,
       draggable: false,
-      load: null,
+      load: undefined,
       lazy: false,
       valueMode: 'onlyLeaf',
-      filter: null,
+      filter: undefined,
       // 每次搜索条件变更，重置展开状态，路径节点展开，显示命中节点
       // allowFoldNodeOnFilter 为 true 时，搜索条件不变的情况下，允许折叠路径节点
       // 默认状态，allowFoldNodeOnFilter 为 false 时，路径节点无法折叠
       allowFoldNodeOnFilter: false,
-      onLoad: null,
-      onReflow: null,
-      onUpdate: null,
+      onLoad: undefined,
+      onReflow: undefined,
+      onUpdate: undefined,
       ...options,
     };
     this.config = config;
@@ -141,9 +141,9 @@ export class TreeStore {
     this.checkedMap = new Map();
     this.updatedMap = new Map();
     this.filterMap = new Map();
-    this.prevFilter = null;
+    this.prevFilter = undefined;
     // 这个计时器确保频繁的 update 事件被归纳为1次完整数据更新后的触发
-    this.updateTick = null;
+    this.updateTick = undefined;
     // 在子节点增删改查时，将此属性设置为 true，来触发视图更新
     this.shouldReflow = false;
     // 这个标志会被大量用到
@@ -159,10 +159,12 @@ export class TreeStore {
   public setConfig(options: TypeTreeStoreOptions) {
     const { config } = this;
     let hasChanged = false;
-    Object.keys(options).forEach((key) => {
+    (Object.keys(options) as (keyof TypeTreeStoreOptions)[]).forEach((key) => {
       const val = options[key];
       if (val !== config[key]) {
         hasChanged = true;
+        // @ts-ignore
+        // TODO
         config[key] = val;
       }
     });
@@ -189,7 +191,7 @@ export class TreeStore {
    * @param {string|number|TreeNode} item 获取节点对象的条件，可以是节点 value，也可以是节点本身
    * @return TreeNode 节点对象，如果判断树中没有符合条件的节点，返回 null
    */
-  public getNode(item: TypeTargetNode): TreeNode {
+  public getNode(item?: TypeTargetNode): TreeNode | null {
     let node = null;
     if (isString(item) || isNumber(item)) {
       node = this.nodeMap.get(item);
@@ -214,7 +216,7 @@ export class TreeStore {
    * @param {string} value 节点值
    * @return TreeNode 节点对象
    */
-  public getParent(value: TypeTargetNode): TreeNode {
+  public getParent(value: TypeTargetNode): TreeNode | null {
     let parent = null;
     const node = this.getNode(value);
     if (node) {
@@ -294,23 +296,25 @@ export class TreeStore {
 
     if (options) {
       const conf: TypeTreeFilterOptions = {
-        filter: null,
+        filter: undefined,
         level: Infinity,
         ...options,
       };
       if (isNumber(conf.level) && conf.level !== Infinity) {
-        nodes = nodes.filter((node) => node.level <= conf.level);
+        nodes = nodes.filter((node) => node.level <= conf.level!);
       }
       if (isFunction(conf.filter)) {
         nodes = nodes.filter((node) => {
           const nodeModel = node.getModel();
-          return conf.filter(nodeModel);
+          return conf.filter!(nodeModel);
         });
       }
       if (isPlainObject(conf.props)) {
         nodes = nodes.filter((node) => {
-          const result = Object.keys(conf.props).every((key) => {
-            const propEqual = node[key] === conf.props[key];
+          const result = Object.keys(conf.props!).every((key) => {
+            // @ts-ignore
+            // TODO
+            const propEqual = node[key] === conf.props![key];
             return propEqual;
           });
           return result;
@@ -353,7 +357,7 @@ export class TreeStore {
    */
   private parseNodeData(
     para: TreeNodeValue | TreeNode | TypeTreeNodeData,
-    item: TypeTreeNodeData | TreeNode,
+    item?: TypeTreeNodeData | TreeNode,
   ) {
     let value: TreeNodeValue = '';
     let node = null;
@@ -498,7 +502,7 @@ export class TreeStore {
 
     if (this.updateTick) return;
     this.updateTick = nextTick(() => {
-      this.updateTick = null;
+      this.updateTick = undefined;
 
       // 检查节点是否需要回流，重排数组
       if (this.shouldReflow) {
@@ -518,10 +522,9 @@ export class TreeStore {
         updatedMap.set(nodePrivateKey, stateId);
         return this.privateMap.get(nodePrivateKey);
       });
-
       // 统计需要更新状态的节点，派发更新事件
       this.emit('update', {
-        nodes: updatedNodes,
+        nodes: updatedNodes.filter((node) => !!node) as TreeNode[],
         map: updatedMap,
       });
 
@@ -890,8 +893,10 @@ export class TreeStore {
   public emit(name: string, state?: TypeTreeEventState): void {
     const { config, emitter } = this;
     const methodName = camelCase(`on-${name}`);
-    const method = config[methodName];
+    const method = config[methodName as keyof TypeTreeStoreOptions];
     if (isFunction(method)) {
+      // @ts-ignore
+      // TODO
       method(state);
     }
     emitter.emit(name, state);

@@ -3,20 +3,20 @@ export default function observe(
   root: HTMLElement,
   callback: Function,
   marginBottom: number,
-): IntersectionObserver {
+): IntersectionObserver | null {
   if (typeof window === 'undefined') return null;
   if (!window || !window.IntersectionObserver) {
     callback();
     return null;
   }
-  let io: IntersectionObserver = null;
+  let io: IntersectionObserver | null = null;
   try {
     io = new window.IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (entry.isIntersecting) {
           callback();
-          io.unobserve(element);
+          io?.unobserve(element);
         }
       },
       {

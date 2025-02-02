@@ -39,6 +39,8 @@ export const privateKey = '__tdesign_id__';
 // public 方法，在 ui 组件中有可能在使用，会保障其输入输出实现
 // private 方法，可能会改动其输入输出
 
+// TODO: 建议统一一下 null 和 undefined，只使用一个即可
+
 /**
  * tree 节点数据模型
  * @class TreeNode
@@ -60,16 +62,16 @@ export class TreeNode {
   public label: string;
 
   // 节点数据
-  public data: TypeTreeNodeData;
+  public data?: TypeTreeNodeData | null;
 
   // 父节点
-  public parent: TreeNode;
+  public parent: TreeNode | null;
 
   // 子节点列表
-  public children: TreeNode[] | boolean;
+  public children: TreeNode[] | boolean | null;
 
   // 暴露的 treeNodeModel，这个对象的属性和 api 提供给用户使用
-  public model: TypeTreeNodeModel;
+  public model: TypeTreeNodeModel | null;
 
   // 是否为叶节点
   public vmIsLeaf: boolean;
@@ -127,8 +129,8 @@ export class TreeNode {
 
   public constructor(
     tree: TreeStore,
-    data?: TypeTreeNodeData,
-    parent?: TreeNode,
+    data?: TypeTreeNodeData | null,
+    parent?: TreeNode | null,
   ) {
     this.data = data;
     this.tree = tree;
@@ -160,7 +162,7 @@ export class TreeNode {
     this.checked = false;
     this.indeterminate = false;
     this.loading = false;
-    this.expanded = config.expandAll;
+    this.expanded = !!config.expandAll;
 
     // 下面几个属性，节点初始化的时候，可以设置与 treeStore.config 不同的值
     // 初始化默认值为 null, 则在方法判断时，默认以 treeStore.config 为准
@@ -194,7 +196,7 @@ export class TreeNode {
     this.disabled = get(data, propDisabled) || false;
 
     // 设置子节点
-    const children = data[propChildren];
+    const children = data?.[propChildren];
     // 子节点为 true 的状态逻辑需要放到状态计算之前
     // 初始化加载逻辑需要依据这个来进行
     if (children === true) {
@@ -211,7 +213,9 @@ export class TreeNode {
     // 同步数据属性到节点属性
     // 仅 syncableStatus 列举的属性被同步到 treeNode 实例属性
     syncableProps.forEach((prop) => {
-      if (typeof data[prop] !== 'undefined') {
+      if (typeof data?.[prop] !== 'undefined') {
+        // @ts-ignore
+        // TODO
         this[prop] = data[prop];
       }
     });
@@ -337,7 +341,7 @@ export class TreeNode {
    * @param {number} [index] 预期在子节点列表中的位置
    * @return void
    */
-  public appendTo(tree: TreeStore, parent?: TreeNode, index?: number): void {
+  public appendTo(tree: TreeStore, parent?: TreeNode | null, index?: number): void {
     const parentNode = parent;
     let targetIndex = -1;
     if (isNumber(index)) {
@@ -369,7 +373,7 @@ export class TreeNode {
       if (!Array.isArray(parentNode?.children)) {
         parentNode.children = [];
       }
-      siblings = parent.children;
+      siblings = parent?.children;
     } else {
       siblings = tree.children;
     }
@@ -401,7 +405,7 @@ export class TreeNode {
       siblings.push(this);
     }
 
-    this.parent = parentNode;
+    this.parent = parentNode || null;
 
     // 插入节点应当继承展开状态
     // 但不要继承选中状态和高亮状态
@@ -552,10 +556,12 @@ export class TreeNode {
     keys.forEach((key) => {
       // key, disabled 字段可被 tree.config.keys 定义
       if (hasOwnProperty.call(settableStatus, key) || key === 'label') {
+        // @ts-ignore
+        // TODO
         this[key] = item[key];
       }
       if (key === 'disabled') {
-        this.setDisabled(item[key]);
+        this.setDisabled(!!item[key]);
       }
     });
     tree.updated(this);
@@ -567,7 +573,7 @@ export class TreeNode {
    * 获取本节点的父节点
    * @return TreeNode 父节点
    */
-  public getParent(): TreeNode {
+  public getParent(): TreeNode | null {
     return this.parent;
   }
 
@@ -682,7 +688,7 @@ export class TreeNode {
     if (hasFilter) {
       // 仅在存在过滤条件时，过滤命中才有效
       const nodeModel = this.getModel();
-      rest = config.filter(nodeModel);
+      rest = !!config.filter?.(nodeModel);
     }
 
     if (rest) {
@@ -1041,7 +1047,7 @@ export class TreeNode {
         if (node.parent) {
           isExpandMutex = node.parent.isExpandMutex();
         } else {
-          isExpandMutex = tree?.config?.expandMutex;
+          isExpandMutex = !!tree?.config?.expandMutex;
         }
         if (isExpandMutex) {
           // 折叠列表中，先移除同级节点
@@ -1274,7 +1280,7 @@ export class TreeNode {
     const { children } = this;
     if (Array.isArray(children) && children.length > 0) {
       // 有子节点，则选中态由子节点选中态集合来决定
-      map.delete(this.value);
+      map?.delete(this.value);
     }
 
     const { parent } = this;
@@ -1303,14 +1309,14 @@ export class TreeNode {
     if (!Array.isArray(children)) return;
     if (children.length <= 0) return;
     // 有子节点，则选中态由子节点选中态集合来决定
-    map.delete(this.value);
+    map?.delete(this.value);
     children.forEach((node) => {
       // 对于 UI 动作，向下扩散时，禁用状态会阻止状态切换
       if (options.isAction && node.isDisabledState()) return;
       if (checked) {
-        map.set(node.value, true);
+        map?.set(node.value, true);
       } else {
-        map.delete(node.value);
+        map?.delete(node.value);
       }
       node.spreadChildrenChecked(checked, map, options);
     });

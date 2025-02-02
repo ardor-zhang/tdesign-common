@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 export interface Coordinate {
   x: number;
   y: number;
@@ -17,16 +16,16 @@ export interface DraggableProps {
 }
 
 interface DraggableHandles {
-  start: (this: Draggable, event: DraggableEvent) => {};
-  drag: (this: Draggable, event: DraggableEvent) => {};
-  end: (this: Draggable, event: DraggableEvent) => {};
+  start: (event: DraggableEvent) => void;
+  drag: (event: DraggableEvent) => void;
+  end: (event: DraggableEvent) => void;
 }
 
 // 配置项
 const defaultsOptions: DraggableProps = {
-  start: (coordinate: Coordinate, event: DraggableEvent) => {},
-  drag: (coordinate: Coordinate, event: DraggableEvent) => {},
-  end: (coordinate: Coordinate, event: DraggableEvent) => {},
+  start: (coordinate: Coordinate, event?: DraggableEvent) => {},
+  drag: (coordinate: Coordinate, event?: DraggableEvent) => {},
+  end: (coordinate: Coordinate, event?: DraggableEvent) => {},
 };
 
 export class Draggable {
@@ -58,20 +57,20 @@ export class Draggable {
     window.addEventListener('mouseup', this.handles.end, false);
     window.addEventListener('contextmenu', this.handles.end, false);
     this.dragging = true;
-    this.props.start(this.#getCoordinate(event), event);
+    this.props.start?.(this.#getCoordinate(event), event);
   }
 
   #drag(event: DraggableEvent) {
     if (!this.dragging) {
       return;
     }
-    this.props.drag(this.#getCoordinate(event), event);
+    this.props.drag?.(this.#getCoordinate(event), event);
   }
 
   #dragEnd(event: DraggableEvent) {
     setTimeout(() => {
       this.dragging = false;
-      this.props.end(this.#getCoordinate(event), event);
+      this.props.end?.(this.#getCoordinate(event), event);
     }, 0);
     window.removeEventListener('mousemove', this.handles.drag, false);
     window.removeEventListener('mouseup', this.handles.end, false);
