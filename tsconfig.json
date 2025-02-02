@@ -9,11 +9,6 @@
     "moduleResolution": "bundler",
     "baseUrl": "./",
 
-    /* JavaScript Support */
-    // todo: 待移除 这个有必要吗？
-    "checkJs": true,
-    "allowJs": true,
-
     /* Emit */
     "declaration": true,
     "removeComments": true,
