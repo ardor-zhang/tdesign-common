@@ -100,7 +100,7 @@ const generateRegExp = (): RegExpLib => {
  * @returns {object|undefined}
  */
 const parseGradient = (regExpLib: RegExpLib, input: string) => {
-  let result: ParseGradientResult | undefined = undefined;
+  let result: ParseGradientResult | undefined;
   let matchColorStop: any;
   let stopResult: ColorStop;
 

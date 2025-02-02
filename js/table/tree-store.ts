@@ -856,7 +856,7 @@ export function updateRowIndex<T>(
     const state = treeDataMap.get(get(item, extra.rowKey));
     if (!state) {
       log.warn('Table', 'tree map went wrong');
-      return
+      return;
     }
     state.rowIndex = rowIndex + (extra?.count || 1) - 1;
   }

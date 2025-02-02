@@ -478,7 +478,9 @@ export const getColorObject = (color: Color): ColorObject | null => {
     return null;
   }
   const colorObject = Object.create(null);
-  COLOR_OBJECT_OUTPUT_KEYS.forEach((key) => (colorObject[key] = (color as { [key: string]: any })[key]));
+  COLOR_OBJECT_OUTPUT_KEYS.forEach((key) => {
+    colorObject[key] = (color as { [key: string]: any })[key];
+  });
   if (color.isGradient) {
     colorObject.linearGradient = color.linearGradient;
   }
