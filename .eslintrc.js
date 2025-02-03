@@ -71,5 +71,8 @@ module.exports = {
     'comma-dangle': 0,
     'no-shadow': 0,
     'object-curly-newline': 0,
+    // 避免 `eslint` 对于 `typescript` 函数重载的误报
+    'no-redeclare': 'off',
+    '@typescript-eslint/no-redeclare': 'error'
   },
 };

@@ -118,6 +118,8 @@ export function getFlexGapPolyFill() {
  * @param maxCharacter 规定最大字符串长度
  * @returns 当没有传入maxCharacter时返回字符串字符长度，当传入maxCharacter时返回截取之后的字符串和长度。
  */
+export function getCharacterLength(str: string): number;
+export function getCharacterLength(str: string, maxCharacter?: number): { length: number; characters: string }
 export function getCharacterLength(str: string, maxCharacter?: number) {
   const hasMaxCharacter = isNumber(maxCharacter);
   if (!str || str.length === 0) {
