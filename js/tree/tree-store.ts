@@ -164,7 +164,7 @@ export class TreeStore {
       if (val !== config[key]) {
         hasChanged = true;
         // @ts-ignore
-        // TODO: 待移除
+        // TODO: https://github.com/microsoft/TypeScript/issues/32693
         config[key] = val;
       }
     });
@@ -313,7 +313,7 @@ export class TreeStore {
         nodes = nodes.filter((node) => {
           const result = Object.keys(conf.props).every((key) => {
             // @ts-ignore
-            // TODO: 待移除
+            // TODO: https://github.com/microsoft/TypeScript/issues/32693
             const propEqual = node[key] === conf.props[key];
             return propEqual;
           });
