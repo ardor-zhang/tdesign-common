@@ -4,6 +4,6 @@
  * @param vars 取值的对象
  * @returns 替换后的字符串
  */
-function template<T extends Record<string, string>>(str: string, vars: T): string {
+export function template<T extends Record<string, string>>(str: string, vars: T): string {
   return str.replace(/\${(.*?)}/g, (_, prop: string) => vars[prop.trim()] || '');
 }
